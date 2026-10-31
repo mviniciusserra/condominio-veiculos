@@ -398,7 +398,7 @@ export default function App() {
                 <TextField label="Nome completo" fullWidth value={suFullName} onChange={(e) => setSuFullName(e.target.value)} />
                 <TextField
                   label="Telefone/WhatsApp" fullWidth value={suPhone}
-                  onChange={(e) => setSuPhone(e.target.value)} placeholder="+5511999999999"
+                  onChange={(e) => setSuPhone(e.target.value)} placeholder="11988887777"
                   onBlur={() => setSuPhone((prev) => (prev ? normalizePhone(prev) : prev))}
                 />
                 <TextField select label="Unidade" fullWidth value={suUnitId} onChange={(e) => setSuUnitId(e.target.value)}>
