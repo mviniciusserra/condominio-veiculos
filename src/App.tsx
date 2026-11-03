@@ -40,6 +40,7 @@ export default function App() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoadError, setProfileLoadError] = useState<string | null>(null);
   const [myAccessRequest, setMyAccessRequest] = useState<AccessRequest | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -86,7 +87,7 @@ export default function App() {
     if (userId) void loadProfileAndData();
     else {
       setVehicles([]); setMyUnits([]); setIsAdmin(false);
-      setProfile(null); setMyAccessRequest(null); setProfileLoading(true);
+      setProfile(null); setMyAccessRequest(null); setProfileLoading(true); setProfileLoadError(null);
     }
     // loadProfileAndData é disparado só quando o usuário autenticado muda.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,10 +96,12 @@ export default function App() {
   async function loadProfileAndData() {
     if (!supabase || !userId) return;
     setProfileLoading(true);
+    setProfileLoadError(null);
     const { data: profileRow, error: profileError } = await supabase
       .from('profiles').select('id,full_name,phone,show_phone,status').eq('id', userId).maybeSingle();
     if (profileError) {
-      notify(profileError.message, 'error');
+      // Sem o perfil não dá para saber o status da conta; não cair na tela de "pendente".
+      setProfileLoadError(profileError.message);
       setProfileLoading(false);
       return;
     }
@@ -213,6 +216,24 @@ export default function App() {
   if (!session) return <><AuthScreen units={publicUnits} />{snackbar}</>;
 
   if (profileLoading) return <CenteredLoading />;
+
+  if (profileLoadError) {
+    return (
+      <Box className="login-page">
+        <Paper elevation={0} className="login-card">
+          <Typography variant="h5">Não foi possível carregar sua conta</Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+            Tente novamente em instantes. Se o problema continuar, avise o administrador do condomínio.
+          </Typography>
+          <Alert severity="error" sx={{ mb: 2 }}>{profileLoadError}</Alert>
+          <Stack direction="row" gap={1.5} justifyContent="center">
+            <Button variant="contained" onClick={() => void loadProfileAndData()}>Tentar novamente</Button>
+            <Button variant="outlined" onClick={() => void signOut()}>Sair</Button>
+          </Stack>
+        </Paper>
+      </Box>
+    );
+  }
 
   if (!profile || profile.status !== 'approved') {
     return (
