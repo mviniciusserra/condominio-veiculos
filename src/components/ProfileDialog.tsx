@@ -29,7 +29,7 @@ export default function ProfileDialog({
   open, onClose, profile, myAccessRequest, currentUnit, units, onSaved, onNotice,
 }: ProfileDialogProps) {
   const [fullName, setFullName] = useState(profile.full_name ?? '');
-  const [phone, setPhone] = useState(profile.phone_e164 ?? '');
+  const [phone, setPhone] = useState(profile.phone ?? '');
   const [showPhone, setShowPhone] = useState(profile.show_phone);
   const [saving, setSaving] = useState(false);
   const [requestUnitId, setRequestUnitId] = useState('');
@@ -38,7 +38,7 @@ export default function ProfileDialog({
   useEffect(() => {
     if (open) {
       setFullName(profile.full_name ?? '');
-      setPhone(profile.phone_e164 ?? '');
+      setPhone(profile.phone ?? '');
       setShowPhone(profile.show_phone);
       setRequestUnitId('');
     }
@@ -46,7 +46,7 @@ export default function ProfileDialog({
 
   async function saveProfile() {
     if (!supabase) return;
-    const parsed = profileSchema.safeParse({ full_name: fullName, phone_e164: phone, show_phone: showPhone });
+    const parsed = profileSchema.safeParse({ full_name: fullName, phone, show_phone: showPhone });
     if (!parsed.success) {
       onNotice(parsed.error.issues[0]?.message ?? 'Confira os campos do formulário.', 'error');
       return;
@@ -54,8 +54,8 @@ export default function ProfileDialog({
     setSaving(true);
     const { error } = await supabase.rpc('update_my_profile', {
       p_full_name: parsed.data.full_name,
-      p_phone_e164: parsed.data.phone_e164 || null,
-      p_show_phone: parsed.data.show_phone,
+      p_phone: parsed.data.phone || null,
+      p_show_phone: parsed.data.show_phone && Boolean(parsed.data.phone),
     });
     setSaving(false);
     if (error) { onNotice(error.message, 'error'); return; }
@@ -90,8 +90,8 @@ export default function ProfileDialog({
             placeholder="11988887777" helperText="DDD + número. Deixe em branco para remover."
           />
           <FormControlLabel
-            control={<Switch checked={showPhone} onChange={(e) => setShowPhone(e.target.checked)} />}
-            label="Exibir meu telefone aos demais moradores ao consultarem um veículo meu"
+            control={<Switch checked={showPhone && Boolean(phone.trim())} onChange={(e) => setShowPhone(e.target.checked)} disabled={!phone.trim()} />}
+            label="Exibir meu telefone aos moradores aprovados que consultarem um veículo da minha unidade"
           />
           <DialogActionsButton saving={saving} onSave={() => void saveProfile()} />
 
