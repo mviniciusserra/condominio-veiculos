@@ -87,7 +87,7 @@ export default function ProfileDialog({
           <TextField label="Nome completo" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           <TextField
             label="Telefone/WhatsApp" value={phone} onChange={(e) => setPhone(e.target.value)}
-            placeholder="+5511999999999" helperText="Formato internacional. Deixe em branco para remover."
+            placeholder="11988887777" helperText="DDD + número. Deixe em branco para remover."
           />
           <FormControlLabel
             control={<Switch checked={showPhone} onChange={(e) => setShowPhone(e.target.checked)} />}

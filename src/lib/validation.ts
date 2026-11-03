@@ -19,18 +19,16 @@ export function formatPlate(plate: string): string {
   return normalized.length === 7 ? `${normalized.slice(0, 3)}-${normalized.slice(3)}` : plate;
 }
 
-const PHONE_REGEX = /^\+[1-9]\d{7,14}$/;
+// Telefone nacional (DDD + número), sem DDI: todos os moradores são do Brasil.
+const PHONE_REGEX = /^[1-9]{2}\d{8,9}$/;
 
 export function normalizePhone(raw: string): string {
-  const trimmed = raw.trim();
-  if (!trimmed) return '';
-  const digits = trimmed.replace(/[^\d+]/g, '');
-  return digits.startsWith('+') ? digits : `+${digits}`;
+  return raw.replace(/\D/g, '');
 }
 
 const phoneField = z.string().trim()
   .transform((value) => normalizePhone(value))
-  .refine((value) => value === '' || PHONE_REGEX.test(value), 'Informe um telefone no formato internacional, ex.: +5511999999999.');
+  .refine((value) => value === '' || PHONE_REGEX.test(value), 'Informe um telefone válido com DDD, ex.: 11988887777.');
 
 export const profileSchema = z.object({
   full_name: z.string().trim().min(1, 'Informe o nome completo.').max(120),
@@ -50,6 +48,6 @@ export const signUpSchema = z.object({
 
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
-export function whatsAppLink(phoneE164: string): string {
-  return `https://wa.me/${phoneE164.replace(/\D/g, '')}`;
+export function whatsAppLink(phoneNational: string): string {
+  return `https://wa.me/55${phoneNational.replace(/\D/g, '')}`;
 }
