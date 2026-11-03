@@ -34,7 +34,7 @@ export type ProfileStatus = 'pending' | 'approved' | 'rejected' | 'revoked';
 export interface Profile {
   id: string;
   full_name: string | null;
-  phone_e164: string | null;
+  phone: string | null;
   show_phone: boolean;
   status: ProfileStatus;
 }
@@ -47,7 +47,7 @@ export interface AccessRequest {
   user_id: string;
   unit_id: string;
   full_name: string | null;
-  phone_e164: string | null;
+  phone: string | null;
   kind: AccessRequestKind;
   status: AccessRequestStatus;
   requested_at: string;
@@ -59,13 +59,14 @@ export interface AccessRequest {
 export interface VehicleContact {
   full_name: string | null;
   unit_code: string | null;
-  phone_e164: string | null;
+  phone: string | null;
+  is_owner: boolean;
 }
 
 export interface ApprovedResident {
   id: string;
   full_name: string | null;
-  phone_e164: string | null;
+  phone: string | null;
   show_phone: boolean;
   units: string[];
 }

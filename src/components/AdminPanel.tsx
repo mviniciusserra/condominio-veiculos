@@ -34,7 +34,7 @@ export default function AdminPanel({ open, onClose, currentUserId, onNotice, onC
     setLoading(true);
     const { data, error } = await supabase
       .from('access_requests')
-      .select('id,user_id,unit_id,full_name,phone_e164,kind,status,requested_at,decided_at,decision_note,unit:units(code)')
+      .select('id,user_id,unit_id,full_name,phone,kind,status,requested_at,decided_at,decision_note,unit:units(code)')
       .eq('status', 'pending')
       .order('requested_at', { ascending: true });
     setLoading(false);
@@ -46,7 +46,7 @@ export default function AdminPanel({ open, onClose, currentUserId, onNotice, onC
     if (!supabase) return;
     setLoading(true);
     const [profilesResult, membersResult] = await Promise.all([
-      supabase.from('profiles').select('id,full_name,phone_e164,show_phone').eq('status', 'approved').order('full_name'),
+      supabase.from('profiles').select('id,full_name,phone,show_phone').eq('status', 'approved').order('full_name'),
       supabase.from('unit_members').select('user_id,is_active,unit:units(code)').eq('is_active', true),
     ]);
     setLoading(false);
@@ -61,7 +61,7 @@ export default function AdminPanel({ open, onClose, currentUserId, onNotice, onC
       list.push(row.unit.code);
       unitsByUser.set(row.user_id, list);
     }
-    const residents: ApprovedResident[] = ((profilesResult.data ?? []) as unknown as { id: string; full_name: string | null; phone_e164: string | null; show_phone: boolean }[])
+    const residents: ApprovedResident[] = ((profilesResult.data ?? []) as unknown as { id: string; full_name: string | null; phone: string | null; show_phone: boolean }[])
       .map((profile) => ({ ...profile, units: unitsByUser.get(profile.id) ?? [] }));
     setApproved(residents);
   }
@@ -116,7 +116,7 @@ export default function AdminPanel({ open, onClose, currentUserId, onNotice, onC
                   <Box>
                     <Typography fontWeight={700}>{request.full_name ?? 'Nome não informado'}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {request.phone_e164 ?? 'Sem telefone informado'}
+                      {request.phone ?? 'Sem telefone informado'}
                     </Typography>
                     <Stack direction="row" gap={1} sx={{ mt: 0.5 }}>
                       <Chip size="small" label={KIND_LABELS[request.kind]} />
@@ -153,7 +153,7 @@ export default function AdminPanel({ open, onClose, currentUserId, onNotice, onC
                   <Box>
                     <Typography fontWeight={700}>{resident.full_name ?? 'Nome não informado'}</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {resident.phone_e164 ?? 'Sem telefone'} {resident.show_phone ? '· visível aos moradores' : '· telefone privado'}
+                      {resident.phone ?? 'Sem telefone'} {resident.show_phone ? '· visível aos moradores' : '· telefone privado'}
                     </Typography>
                     <Stack direction="row" gap={1} sx={{ mt: 0.5 }} flexWrap="wrap">
                       {resident.units.length === 0
